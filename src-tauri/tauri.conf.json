@@ -7,7 +7,7 @@
     "distDir": "../out"
   },
   "package": {
-    "productName": "codelearn",
+    "productName": "codejourney",
     "version": "0.1.0"
   },
   "tauri": {
@@ -29,7 +29,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.gdg.codelearn",
+      "identifier": "com.gdgmahajanga.codejourney",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -58,7 +58,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "Codelearn",
+        "title": "CodeJourney",
         "width": 800
       }
     ]
