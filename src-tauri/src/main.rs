@@ -92,7 +92,11 @@ fn main() {
 async fn server(path: PathBuf) {
     let static_files = warp::fs::dir(path);
     // Define the routes
-    let routes = warp::path("static").and(static_files);
+    let cors = warp::cors()
+        .allow_any_origin()
+        .allow_methods(vec!["GET", "POST"]);
+
+    let routes = warp::path("static").and(static_files).with(cors);
     // Start the server
     warp::serve(routes).run(([127, 0, 0, 1], 8000)).await;
 }
