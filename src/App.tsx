@@ -1,7 +1,7 @@
-import Form from "./components/form";
+import AppRoutes from "./routes";
 
 const App = () => {
-  return <Form />;
+  return <AppRoutes />;
 };
 
 export default App;

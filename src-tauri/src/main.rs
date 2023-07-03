@@ -9,6 +9,8 @@ use std::{
     thread,
 };
 
+mod init;
+
 use warp::Filter;
 
 fn write_file(content: &str, test_path: String) {
