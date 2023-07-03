@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mocha Tests</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="http://127.0.0.1:8000/static/mocha.css" />
+    <style>
+      #mocha {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="mocha"></div>
+
+    <script src="http://127.0.0.1:8000/static/chai.js"></script>
+    <script src="http://127.0.0.1:8000/static/mocha.js"></script>
+
+    <script class="mocha-init">
+      mocha.setup({
+        checkLeaks: false,
+        dryRun: false,
+        forbidPending: false,
+        ui: "bdd",
+      });
+    </script>
+    <script>
+      const chai = window.chai;
+      const expect = chai.expect;
+
+      #CODE
+
+      #TEST
+
+      afterEach(function () {
+        // Stop the tests if any assertion fails
+        if (this.currentTest.state === "failed") {
+          this.currentTest.parent.tests.forEach((test) => {
+            test.pending = true;
+          });
+        }
+      });
+    </script>
+    <script class="mocha-exec">
+      mocha.run();
+    </script>
+  </body>
+</html>
