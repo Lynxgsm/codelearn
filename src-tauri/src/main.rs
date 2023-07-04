@@ -9,6 +9,7 @@ use std::{
     thread,
 };
 
+mod create;
 mod init;
 
 use warp::Filter;
@@ -71,6 +72,18 @@ fn read_file(code: String, test: String, template_path: String, test_path: Strin
 fn create_test_file(template_path: String, test_path: String, code: String, test: String) {
     read_file(code, test, template_path, test_path);
 }
+
+#[tauri::command]
+fn generate_test_file() {}
+
+#[tauri::command]
+fn generate_starter_file() {}
+
+#[tauri::command]
+fn generate_json_file() {}
+
+#[tauri::command]
+fn generate_description_file() {}
 
 fn main() {
     let app = tauri::Builder::default().setup(|app| {

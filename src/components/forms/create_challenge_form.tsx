@@ -1,10 +1,11 @@
 import Input from "../common/input";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import { extractFunctionInfo } from "../../helpers/strings";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { formatFormToObject } from "../../helpers/form";
 
 const CreateChallengeForm = () => {
   const [starter, setstarter] = useState("");
@@ -41,10 +42,37 @@ const CreateChallengeForm = () => {
     setdescription(value);
   };
 
+  const generateChallenge = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    console.log(formatFormToObject(formData));
+  };
+
   return (
-    <form action="" className="flex flex-col gap-4">
+    <form
+      action=""
+      onSubmit={generateChallenge}
+      className="flex flex-col gap-4"
+    >
       <div className="flex-1 flex flex-col gap-4">
-        <Input name="title" type="text" label="Titre" required />
+        <Input
+          name="title"
+          type="text"
+          onBlur={(e: ChangeEvent<HTMLInputElement>) => {
+            const title = e.currentTarget.value;
+            const value = `
+describe("#TITLE", () => {
+  it("#TITLE", () => {
+    #TESTS
+  });
+});
+            `;
+
+            settest(value.replaceAll("#TITLE", title));
+          }}
+          label="Titre"
+          required
+        />
         <div>
           <label htmlFor="">Description</label>
           <MDEditor
@@ -70,21 +98,35 @@ const CreateChallengeForm = () => {
             theme={"dark"}
           />
         </div>
-        <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="">
-              Tests{" "}
-              {errorInScript && (
-                <span className="text-sm text-red-500">
-                  (Please correct your javascript function before making tests)
-                </span>
-              )}
-            </label>
-            <button type="button" onClick={incrementTestCount}>
-              <FaPlus />
-            </button>
+        <div className="flex items-center gap-4">
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <label htmlFor="">
+                Tests{" "}
+                {errorInScript && (
+                  <span className="text-sm text-red-500">
+                    (Please correct your javascript function before making
+                    tests)
+                  </span>
+                )}
+              </label>
+              <button type="button" onClick={incrementTestCount}>
+                <FaPlus />
+              </button>
+            </div>
+            <TestBatteries params={params} count={testCount} />
           </div>
-          <TestBatteries params={params} count={testCount} />
+          <div className="flex-1">
+            <CodeMirror
+              className="w-full h-full text-lg"
+              value={test}
+              height="200px"
+              extensions={[javascript({ jsx: true })]}
+              theme={"dark"}
+              aria-disabled="true"
+              readOnly={true}
+            />
+          </div>
         </div>
       </div>
       <button>Create challenge</button>
