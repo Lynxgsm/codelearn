@@ -79,6 +79,8 @@ fn main() {
             .resolve_resource("../dist")
             .expect("failed to resolve resource");
 
+        init::create_challenge_directory(&resource_path);
+
         thread::spawn(move || {
             server(resource_path);
         });
