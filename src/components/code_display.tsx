@@ -13,7 +13,7 @@ const CodeDisplay = () => {
 
   return (
     <CodeMirror
-      className="w-full text-lg"
+      className="w-full h-full text-lg"
       value={value}
       height="200px"
       extensions={[javascript({ jsx: true })]}
