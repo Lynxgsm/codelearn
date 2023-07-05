@@ -25,7 +25,8 @@
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^3.0.1",
     "tailwind-merge": "^1.13.2",
-    "tailwindcss-animate": "^1.0.6"
+    "tailwindcss-animate": "^1.0.6",
+    "valtio": "^1.10.6"
   },
   "devDependencies": {
     "@tauri-apps/api": "^1.4.0",

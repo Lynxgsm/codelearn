@@ -11,4 +11,8 @@ function extractFunctionInfo(text: string) {
   return null;
 }
 
-export { extractFunctionInfo };
+function slugify(text: string) {
+  return text.toLowerCase().replaceAll(" ", "_");
+}
+
+export { extractFunctionInfo, slugify };

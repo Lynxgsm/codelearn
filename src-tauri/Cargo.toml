@@ -20,6 +20,7 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.4.0", features = ["api-all"] }
 warp = "0.3.5"
 tokio = { version = "1", features = ["full"] }
+zip = "0.6.6"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

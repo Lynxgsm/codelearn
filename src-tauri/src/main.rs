@@ -3,16 +3,22 @@
 
 use std::{
     env,
-    fs::File,
-    io::{Read, Write},
-    path::PathBuf,
+    fs::{self, File},
+    io::{BufWriter, Read, Write},
+    path::{Path, PathBuf},
     thread,
 };
 
-mod create;
 mod init;
 
+use tauri::{App, CustomMenuItem, Manager, Menu, MenuItem, Submenu, Window};
 use warp::Filter;
+use zip::ZipWriter;
+
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+    message: String,
+}
 
 fn write_file(content: &str, test_path: String) {
     // Open the file in write mode
@@ -73,23 +79,75 @@ fn create_test_file(template_path: String, test_path: String, code: String, test
     read_file(code, test, template_path, test_path);
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
-fn generate_test_file() {}
+fn generate_challenge(
+    challenge_path: String,
+    zip_path: String,
+    test_path: String,
+    test_content: String,
+    starter_path: String,
+    starter_content: String,
+    json_path: String,
+    json_content: String,
+    description_path: String,
+    description_content: String,
+) {
+    let path = Path::new(&challenge_path);
+    match fs::create_dir(path) {
+        Ok(_) => println!("Directory successfully created"),
+        Err(err) => println!("{:?}", err),
+    }
 
-#[tauri::command]
-fn generate_starter_file() {}
+    // Test file
+    write_file(&test_content, test_path);
 
-#[tauri::command]
-fn generate_json_file() {}
+    // Starter file
+    write_file(&starter_content, starter_path);
 
-#[tauri::command]
-fn generate_description_file() {}
+    // JSON file
+    write_file(&json_content, json_path);
+
+    // Description file
+    write_file(&description_content, description_path);
+
+    // Zip file and move to another directory
+    let file = File::create(zip_path).unwrap();
+    let mut zip_writer = ZipWriter::new(BufWriter::new(file));
+
+    // Recursively add files and directories to the zip archive
+    init::zip_folder(&challenge_path, "", &mut zip_writer).unwrap();
+    // window
+    //     .emit(
+    //         "challenge_created",
+    //         Payload {
+    //             message: "Tauri is awesome!".into(),
+    //         },
+    //     )
+    //     .unwrap();
+}
 
 fn main() {
+    // CUSTOM MENU
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    let close = CustomMenuItem::new("close".to_string(), "Close");
+    let import_challenge = CustomMenuItem::new("import_challenge", "Import challenge");
+    let submenu = Submenu::new(
+        "File",
+        Menu::new()
+            .add_item(quit)
+            .add_item(close)
+            .add_item(import_challenge),
+    );
+    let menu = Menu::new()
+        .add_native_item(MenuItem::Copy)
+        .add_item(CustomMenuItem::new("hide", "Hide"))
+        .add_submenu(submenu);
+
     let app = tauri::Builder::default().setup(|app| {
         let resource_path = app
             .path_resolver()
-            .resolve_resource("../dist")
+            .resolve_resource("../dist/challenges")
             .expect("failed to resolve resource");
 
         init::create_challenge_directory(&resource_path);
@@ -101,6 +159,8 @@ fn main() {
         Ok(())
     });
     app.invoke_handler(tauri::generate_handler![create_test_file])
+        .invoke_handler(tauri::generate_handler![generate_challenge])
+        .menu(menu)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

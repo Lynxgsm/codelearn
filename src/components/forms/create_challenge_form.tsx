@@ -1,23 +1,27 @@
 import Input from "../common/input";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
-import { extractFunctionInfo } from "../../helpers/strings";
+import { extractFunctionInfo, slugify } from "../../helpers/strings";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { formatFormToObject } from "../../helpers/form";
+import { useSnapshot } from "valtio";
+import { store } from "../../store";
+import { invoke } from "@tauri-apps/api/tauri";
+import { resolveResource } from "@tauri-apps/api/path";
+import { listen } from "@tauri-apps/api/event";
+import { open } from "@tauri-apps/api/dialog";
 
 const CreateChallengeForm = () => {
   const [starter, setstarter] = useState("");
-  const [test, settest] = useState("");
   const [errorInScript, seterrorInScript] = useState(false);
+  const [title, settitle] = useState("");
   const [description, setdescription] = useState<string | undefined>("");
-  const [testCount, settestCount] = useState(0);
   const [params, setparams] = useState<string[]>([]);
+  const [functionName, setfunctionName] = useState("");
 
-  const incrementTestCount = () => {
-    settestCount(() => testCount + 1);
-  };
+  const { addTest, setTestString } = store.challenge.actions;
+  const { testString } = useSnapshot(store.challenge.states);
 
   const handleStarterCodeInput = (value: string) => {
     seterrorInScript(false);
@@ -31,6 +35,11 @@ const CreateChallengeForm = () => {
 
       if (result?.params) {
         setparams(result.params.split(","));
+        setfunctionName(result.functionName);
+        addTest({
+          functionName: result.functionName,
+          params: result.params.split(","),
+        });
       }
     } catch (error) {
       seterrorInScript(true);
@@ -42,11 +51,64 @@ const CreateChallengeForm = () => {
     setdescription(value);
   };
 
-  const generateChallenge = (e: FormEvent<HTMLFormElement>) => {
+  const generateChallenge = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    console.log(formatFormToObject(formData));
+
+    const filePath = await open({
+      directory: true,
+    });
+
+    const slug = slugify(title);
+    const zipPath = `${filePath}/${slug}.zip`;
+    const challengePath = await resolveResource(`../dist/challenges/${slug}`);
+    const starterPath = await resolveResource(
+      `../dist/challenges/${slug}/starter.js`
+    );
+    const descriptionPath = await resolveResource(
+      `../dist/challenges/${slug}/description.md`
+    );
+    const testPath = await resolveResource(
+      `../dist/challenges/${slug}/test.js`
+    );
+    const jsonPath = await resolveResource(
+      `../dist/challenges/${slug}/challenge.json`
+    );
+    const data = {
+      challengePath,
+      testPath,
+      zipPath,
+      testContent: testString,
+      starterPath,
+      starterContent: starter,
+      descriptionPath,
+      descriptionContent: description,
+      jsonPath,
+      jsonContent: JSON.stringify({
+        title,
+        level: 0,
+        test: "./challenge.test.js",
+        description: "./description.md",
+        starter: "./starter.js",
+        id: slug,
+        language: "js",
+        author: "Lynxgsm",
+      }),
+    };
+
+    console.log("Generating challenge");
+
+    invoke("generate_challenge", data);
   };
+
+  const eventListener = async () => {
+    await listen("challenge_created", (event) => {
+      console.log(event);
+    });
+  };
+
+  useEffect(() => {
+    eventListener();
+  }, []);
 
   return (
     <form
@@ -58,17 +120,10 @@ const CreateChallengeForm = () => {
         <Input
           name="title"
           type="text"
+          onChange={(e) => settitle(e.currentTarget.value)}
           onBlur={(e: ChangeEvent<HTMLInputElement>) => {
             const title = e.currentTarget.value;
-            const value = `
-describe("#TITLE", () => {
-  it("#TITLE", () => {
-    #TESTS
-  });
-});
-            `;
-
-            settest(value.replaceAll("#TITLE", title));
+            setTestString(testString.replaceAll("#TITLE", title));
           }}
           label="Titre"
           required
@@ -110,16 +165,24 @@ describe("#TITLE", () => {
                   </span>
                 )}
               </label>
-              <button type="button" onClick={incrementTestCount}>
+              <button
+                type="button"
+                onClick={() => {
+                  addTest({
+                    functionName,
+                    params,
+                  });
+                }}
+              >
                 <FaPlus />
               </button>
             </div>
-            <TestBatteries params={params} count={testCount} />
+            <TestBatteries />
           </div>
           <div className="flex-1">
             <CodeMirror
               className="w-full h-full text-lg"
-              value={test}
+              value={testString}
               height="200px"
               extensions={[javascript({ jsx: true })]}
               theme={"dark"}
@@ -134,30 +197,102 @@ describe("#TITLE", () => {
   );
 };
 
-const TestBatteries = ({
-  count,
-  params,
-}: {
-  count: number;
-  params: string[];
-}) => {
+const TestBatteries = () => {
+  const { tests, testsWithValue, testString } = useSnapshot(
+    store.challenge.states
+  );
+  const { setTestString } = store.challenge.actions;
   return (
-    <ul>
-      {Array.from(Array(count).keys()).map((test, index) => (
-        <TestBatteryItem params={params} key={`test_battery_${index}`} />
-      ))}
-    </ul>
+    <>
+      <ul>
+        {tests.map((test, index) => (
+          <TestBatteryItem
+            functionName={test.functionName}
+            params={test.params}
+            key={`${test.functionName}_${index}`}
+            id={`${test.functionName}_${index}`}
+          />
+        ))}
+      </ul>
+      <button
+        type="button"
+        onClick={() => {
+          const generatedString: string[] = [];
+          testsWithValue.forEach((test) => {
+            const values = Object.values(test.params).map((v) => v);
+            values.pop();
+            generatedString.push(
+              `${test.functionName}(${values.join(",")})=${test.result};`
+            );
+          });
+
+          setTestString(
+            testString.replace("#TESTS", generatedString.join("\n"))
+          );
+        }}
+      >
+        Generate test
+      </button>
+    </>
   );
 };
 
-const TestBatteryItem = ({ params }: { params: string[] }) => {
+const TestBatteryItem = ({
+  functionName,
+  params,
+  id,
+}: {
+  functionName: string;
+  params: readonly string[];
+  id: string;
+}) => {
+  const [tests, settests] = useState<{ [key: string]: string }>(
+    params.reduce((acc, current) => {
+      acc[current] = "";
+      return acc;
+    }, {} as { [key: string]: string })
+  );
+
+  const { setTestsWithValue } = store.challenge.actions;
+
   return (
     <li className="flex items-center gap-2">
       <div className="flex-1 flex items-center gap-2">
-        {params.map((param, index) => (
-          <Input name={`param_${index}`} label={param} />
-        ))}
-        <Input name="result" label="Expected result" />
+        {Object.keys(tests)
+          .filter((test) => test !== "result")
+          .map((param, index) => (
+            <Input
+              name={`param_${index}`}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const value = e.currentTarget.value;
+                if (value) {
+                  settests((t) => {
+                    t[param] = value;
+                    return t;
+                  });
+                }
+              }}
+              label={param}
+            />
+          ))}
+        <Input
+          name="result"
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const result = e.currentTarget.value;
+            settests((t) => {
+              t["result"] = result;
+              return t;
+            });
+
+            setTestsWithValue({
+              id,
+              functionName,
+              params: tests,
+              result,
+            });
+          }}
+          label="Expected result"
+        />
       </div>
       <button>
         <FaTrash />
