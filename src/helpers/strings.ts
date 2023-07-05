@@ -15,4 +15,8 @@ function slugify(text: string) {
   return text.toLowerCase().replaceAll(" ", "_");
 }
 
-export { extractFunctionInfo, slugify };
+function unslugify(text: string) {
+  return text.replaceAll("_", " ");
+}
+
+export { extractFunctionInfo, slugify, unslugify };

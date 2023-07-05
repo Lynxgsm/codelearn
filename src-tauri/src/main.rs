@@ -11,7 +11,7 @@ use std::{
 
 mod init;
 
-use tauri::{App, CustomMenuItem, Manager, Menu, MenuItem, Submenu, Window};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 use warp::Filter;
 use zip::ZipWriter;
 
@@ -117,14 +117,38 @@ fn generate_challenge(
 
     // Recursively add files and directories to the zip archive
     init::zip_folder(&challenge_path, "", &mut zip_writer).unwrap();
-    // window
-    //     .emit(
-    //         "challenge_created",
-    //         Payload {
-    //             message: "Tauri is awesome!".into(),
-    //         },
-    //     )
-    //     .unwrap();
+}
+
+#[tauri::command]
+fn list_challenges(challenge_path: String) -> Vec<String> {
+    match fs::read_dir(challenge_path) {
+        Ok(entries) => {
+            let directory_names: Vec<String> = entries
+                .filter_map(|entry| {
+                    if let Ok(entry) = entry {
+                        if entry.file_type().unwrap().is_dir() {
+                            Some(entry.file_name().to_string_lossy().into_owned())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            directory_names
+        }
+        Err(e) => {
+            eprintln!("Error reading directory: {}", e);
+            Vec::new()
+        }
+    }
+}
+
+#[tauri::command]
+fn importing_challenge(zip_path: String) {
+    println!("Importing challenge")
 }
 
 fn main() {
@@ -139,6 +163,7 @@ fn main() {
             .add_item(close)
             .add_item(import_challenge),
     );
+
     let menu = Menu::new()
         .add_native_item(MenuItem::Copy)
         .add_item(CustomMenuItem::new("hide", "Hide"))
@@ -158,11 +183,16 @@ fn main() {
 
         Ok(())
     });
-    app.invoke_handler(tauri::generate_handler![create_test_file])
-        .invoke_handler(tauri::generate_handler![generate_challenge])
-        .menu(menu)
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+
+    app.invoke_handler(tauri::generate_handler![
+        create_test_file,
+        list_challenges,
+        generate_challenge,
+        importing_challenge
+    ])
+    .menu(menu)
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }
 
 #[tokio::main]

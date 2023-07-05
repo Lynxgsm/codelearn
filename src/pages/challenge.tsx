@@ -1,12 +1,10 @@
 import CodeDisplay from "../components/code_display";
 import SubjectDisplay from "../components/subject_display";
-import { Link } from "react-router-dom";
 
 const ChallengePage = () => {
   return (
     <div className="w-full p-8">
       <p>Sum of two numbers</p>
-      <Link to="/create">Create challenge</Link>
       <div className="flex gap-4 min-h-[80vh] flex-grow-1">
         <div className="flex-1">
           <SubjectDisplay file={``} />
