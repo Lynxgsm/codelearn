@@ -6,6 +6,7 @@ type ChallengeActionProps = {
   setTestsWithValue: (value: TestWithResult) => void;
   setFunctionName: (name: string) => void;
   setTestString: (test: string) => void;
+  setWrittenCode: (code: string) => void;
 };
 
 export const ChallengeActions: ChallengeActionProps = {
@@ -23,4 +24,5 @@ export const ChallengeActions: ChallengeActionProps = {
     }
   },
   setTestString: (test) => (store.challenge.states.testString = test),
+  setWrittenCode: (code) => (store.challenge.states.writtenCode = code),
 };

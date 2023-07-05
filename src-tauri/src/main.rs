@@ -19,6 +19,13 @@ use zip::ZipWriter;
 struct Payload {
     message: String,
 }
+#[derive(Clone, serde::Serialize)]
+struct ChallengePaths {
+    starter: String,
+    json: String,
+    description: String,
+    test: String,
+}
 
 fn write_file(content: &str, test_path: String) {
     // Open the file in write mode
@@ -151,6 +158,26 @@ fn importing_challenge(zip_path: String) {
     println!("Importing challenge")
 }
 
+#[tauri::command]
+fn load_challenge(
+    starter_path: String,
+    json_path: String,
+    description_path: String,
+    test_path: String,
+) -> ChallengePaths {
+    let starter = init::read_file(starter_path);
+    let json = init::read_file(json_path);
+    let description = init::read_file(description_path);
+    let test = init::read_file(test_path);
+
+    ChallengePaths {
+        starter,
+        json,
+        description,
+        test,
+    }
+}
+
 fn main() {
     // CUSTOM MENU
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
@@ -172,10 +199,15 @@ fn main() {
     let app = tauri::Builder::default().setup(|app| {
         let resource_path = app
             .path_resolver()
+            .resolve_resource("../dist")
+            .expect("failed to resolve resource");
+
+        let challenge_path = app
+            .path_resolver()
             .resolve_resource("../dist/challenges")
             .expect("failed to resolve resource");
 
-        init::create_challenge_directory(&resource_path);
+        init::create_challenge_directory(&challenge_path);
 
         thread::spawn(move || {
             server(resource_path);
@@ -188,7 +220,8 @@ fn main() {
         create_test_file,
         list_challenges,
         generate_challenge,
-        importing_challenge
+        importing_challenge,
+        load_challenge
     ])
     .menu(menu)
     .run(tauri::generate_context!())

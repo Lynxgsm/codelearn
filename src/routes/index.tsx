@@ -10,7 +10,7 @@ const AppRoutes = () => {
       <MainLayout>
         <Routes>
           <Route path="/" element={<ListPage />} />
-          <Route path="/challenge/:id" element={<ChallengePage />} />
+          <Route path="/challenge/:slug" element={<ChallengePage />} />
           <Route path="/create" element={<CreateChallengePage />} />
         </Routes>
       </MainLayout>

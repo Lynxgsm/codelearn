@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, BufWriter};
+use std::io::{BufReader, BufWriter, Read};
 use std::{fs, path::PathBuf};
 
 use zip::write::FileOptions;
@@ -43,4 +43,33 @@ pub fn zip_folder(
     }
 
     Ok(())
+}
+
+pub fn read_file(file_path: String) -> String {
+    let file = File::open(file_path);
+
+    match file {
+        Ok(mut file) => {
+            // Create a buffer to hold the file contents
+            let mut buffer = String::new();
+
+            // Read the file contents into the buffer
+            match file.read_to_string(&mut buffer) {
+                Ok(_) => {
+                    // File read successfully
+                    buffer
+                }
+                Err(e) => {
+                    // Error reading the file
+                    println!("Error reading file: {}", e);
+                    String::new()
+                }
+            }
+        }
+        Err(e) => {
+            // Error opening the file
+            println!("Error opening file: {}", e);
+            String::new()
+        }
+    }
 }
