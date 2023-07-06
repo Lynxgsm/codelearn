@@ -15,4 +15,12 @@ function slugify(text: string) {
   return text.toLowerCase().replaceAll(" ", "_");
 }
 
-export { extractFunctionInfo, slugify };
+function unslugify(text: string) {
+  return text.replaceAll("_", " ");
+}
+
+function extractSlugName(text: string) {
+  return text.split("/").at(-1)?.split(".")[0];
+}
+
+export { extractFunctionInfo, slugify, unslugify, extractSlugName };

@@ -11,13 +11,20 @@ use std::{
 
 mod init;
 
-use tauri::{App, CustomMenuItem, Manager, Menu, MenuItem, Submenu, Window};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 use warp::Filter;
 use zip::ZipWriter;
 
 #[derive(Clone, serde::Serialize)]
 struct Payload {
     message: String,
+}
+#[derive(Clone, serde::Serialize)]
+struct ChallengePaths {
+    starter: String,
+    json: String,
+    description: String,
+    test: String,
 }
 
 fn write_file(content: &str, test_path: String) {
@@ -117,14 +124,63 @@ fn generate_challenge(
 
     // Recursively add files and directories to the zip archive
     init::zip_folder(&challenge_path, "", &mut zip_writer).unwrap();
-    // window
-    //     .emit(
-    //         "challenge_created",
-    //         Payload {
-    //             message: "Tauri is awesome!".into(),
-    //         },
-    //     )
-    //     .unwrap();
+}
+
+#[tauri::command]
+fn list_challenges(challenge_path: String) -> Vec<String> {
+    match fs::read_dir(challenge_path) {
+        Ok(entries) => {
+            let directory_names: Vec<String> = entries
+                .filter_map(|entry| {
+                    if let Ok(entry) = entry {
+                        if entry.file_type().unwrap().is_dir() {
+                            Some(entry.file_name().to_string_lossy().into_owned())
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+
+            directory_names
+        }
+        Err(e) => {
+            eprintln!("Error reading directory: {}", e);
+            Vec::new()
+        }
+    }
+}
+
+#[tauri::command]
+fn importing_challenge(file_extraction_path: String, file_path: String, challenge_path: String) {
+    match fs::create_dir(&file_extraction_path) {
+        Ok(_) => println!("Directory successfully created"),
+        Err(err) => println!("{:?}", err),
+    }
+
+    init::unzip_file(&file_path, &file_extraction_path);
+}
+
+#[tauri::command]
+fn load_challenge(
+    starter_path: String,
+    json_path: String,
+    description_path: String,
+    test_path: String,
+) -> ChallengePaths {
+    let starter = init::read_file(starter_path);
+    let json = init::read_file(json_path);
+    let description = init::read_file(description_path);
+    let test = init::read_file(test_path);
+
+    ChallengePaths {
+        starter,
+        json,
+        description,
+        test,
+    }
 }
 
 fn main() {
@@ -139,6 +195,7 @@ fn main() {
             .add_item(close)
             .add_item(import_challenge),
     );
+
     let menu = Menu::new()
         .add_native_item(MenuItem::Copy)
         .add_item(CustomMenuItem::new("hide", "Hide"))
@@ -147,10 +204,15 @@ fn main() {
     let app = tauri::Builder::default().setup(|app| {
         let resource_path = app
             .path_resolver()
+            .resolve_resource("../dist")
+            .expect("failed to resolve resource");
+
+        let challenge_path = app
+            .path_resolver()
             .resolve_resource("../dist/challenges")
             .expect("failed to resolve resource");
 
-        init::create_challenge_directory(&resource_path);
+        init::create_challenge_directory(&challenge_path);
 
         thread::spawn(move || {
             server(resource_path);
@@ -158,11 +220,17 @@ fn main() {
 
         Ok(())
     });
-    app.invoke_handler(tauri::generate_handler![create_test_file])
-        .invoke_handler(tauri::generate_handler![generate_challenge])
-        .menu(menu)
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+
+    app.invoke_handler(tauri::generate_handler![
+        create_test_file,
+        list_challenges,
+        generate_challenge,
+        importing_challenge,
+        load_challenge
+    ])
+    .menu(menu)
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
 }
 
 #[tokio::main]

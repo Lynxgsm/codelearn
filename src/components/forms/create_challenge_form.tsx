@@ -95,8 +95,6 @@ const CreateChallengeForm = () => {
       }),
     };
 
-    console.log("Generating challenge");
-
     invoke("generate_challenge", data);
   };
 
@@ -222,7 +220,9 @@ const TestBatteries = () => {
             const values = Object.values(test.params).map((v) => v);
             values.pop();
             generatedString.push(
-              `${test.functionName}(${values.join(",")})=${test.result};`
+              `expect(${test.functionName}(${values.join(",")})).to.equal(${
+                test.result
+              });`
             );
           });
 
