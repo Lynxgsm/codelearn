@@ -14,7 +14,7 @@ const MainLayout: FC<PropsWithChildren> = ({ children }) => {
           </button>
         </nav>
       )}
-      {children}
+      <section className="p-8 flex flex-col">{children}</section>
     </main>
   );
 };
