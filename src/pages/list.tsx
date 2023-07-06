@@ -1,19 +1,53 @@
-import { unslugify } from "../helpers/strings";
+import { extractSlugName, unslugify } from "../helpers/strings";
 import useChallengeList from "../hooks/useChallengeList";
 import { Link } from "react-router-dom";
+import { open } from "@tauri-apps/api/dialog";
+import { invoke } from "@tauri-apps/api/tauri";
+import { resolveResource } from "@tauri-apps/api/path";
+import { CHALLENGE_PATH } from "../constants/path";
+import { useState } from "react";
 
 const ListPage = () => {
+  const [loading, setloading] = useState(false);
+  const importChallenge = async () => {
+    setloading(true);
+    const selected = await open({
+      filters: [
+        {
+          name: "Zip",
+          extensions: ["zip"],
+        },
+      ],
+    });
+
+    if (selected && typeof selected === "string") {
+      const filename = extractSlugName(selected);
+      const challengePath = await resolveResource(CHALLENGE_PATH);
+      const fileExtractionPath = await resolveResource(
+        `${CHALLENGE_PATH}/${filename}`
+      );
+
+      invoke("importing_challenge", {
+        filePath: selected,
+        challengePath,
+        fileExtractionPath,
+      });
+
+      setloading(false);
+    }
+  };
   return (
     <section className="p-4 flex flex-col gap-4">
       <h1 className="text-2xl">Challenges</h1>
       <div className="flex items-start gap-8">
-        <ListContainer />
+        {loading ? <p>Loading...</p> : <ListContainer />}
         <Link
           to="/create"
           className="grid place-content-center p-8 border-2 border-dashed hover:bg-neutral-400 hover:border-solid"
         >
           Create challenge
         </Link>
+        <button onClick={importChallenge}>Import challenge</button>
       </div>
     </section>
   );

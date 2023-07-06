@@ -19,4 +19,8 @@ function unslugify(text: string) {
   return text.replaceAll("_", " ");
 }
 
-export { extractFunctionInfo, slugify, unslugify };
+function extractSlugName(text: string) {
+  return text.split("/").at(-1)?.split(".")[0];
+}
+
+export { extractFunctionInfo, slugify, unslugify, extractSlugName };

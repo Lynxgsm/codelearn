@@ -154,8 +154,13 @@ fn list_challenges(challenge_path: String) -> Vec<String> {
 }
 
 #[tauri::command]
-fn importing_challenge(zip_path: String) {
-    println!("Importing challenge")
+fn importing_challenge(file_extraction_path: String, file_path: String, challenge_path: String) {
+    match fs::create_dir(&file_extraction_path) {
+        Ok(_) => println!("Directory successfully created"),
+        Err(err) => println!("{:?}", err),
+    }
+
+    init::unzip_file(&file_path, &file_extraction_path);
 }
 
 #[tauri::command]
