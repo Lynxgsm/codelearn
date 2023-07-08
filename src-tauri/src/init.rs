@@ -55,7 +55,7 @@ pub fn unzip_file(
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i)?;
-        let file_path = file.sanitized_name();
+        let file_path = file.mangled_name();
 
         // Extract only regular files, ignore directories and symbolic links
         if !file.name().ends_with('/') {

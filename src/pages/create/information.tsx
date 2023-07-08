@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import Input from "../../components/common/input";
 import MDEditor from "@uiw/react-md-editor";
 import { store } from "../../store";
@@ -7,24 +7,27 @@ import Button from "../../components/common/button";
 import { toast } from "react-hot-toast";
 
 const CreateInformation = () => {
-  const [starter, setstarter] = useState("");
-  const [errorInScript, seterrorInScript] = useState(false);
-  const [title, settitle] = useState("");
-  const [description, setdescription] = useState<string | undefined>("");
-  const [params, setparams] = useState<string[]>([]);
-  const [functionName, setfunctionName] = useState("");
-
-  const { setTestString } = store.challenge.actions;
+  const { modifyTestString } = store.challenge.actions;
   const { handleNext } = store.stepper.actions;
-  const { testString } = useSnapshot(store.challenge.states);
+  const { testString, title, description } = useSnapshot(
+    store.challenge.states
+  );
 
   const handleContent = (value?: string | undefined) => {
-    setdescription(value);
+    if (value) {
+      store.challenge.states.description = value;
+    }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setTestString(testString.replaceAll("#TITLE", title));
+
+    title.includes("#TITLE")
+      ? (store.challenge.states.testString = testString.replaceAll(
+          "#TITLE",
+          title
+        ))
+      : modifyTestString(title);
 
     if (description) {
       handleNext();
@@ -39,9 +42,10 @@ const CreateInformation = () => {
       <Input
         name="title"
         type="text"
-        onChange={(e) => settitle(e.currentTarget.value)}
+        onChange={(e) => (store.challenge.states.title = e.currentTarget.value)}
         label="Titre"
         required
+        value={title}
       />
       <div>
         <label htmlFor="description">Description</label>
