@@ -12,7 +12,7 @@ const ChallengePage = () => {
   const { slug } = useParams();
   const [loadTest, setloadTest] = useState(false);
   const { starter, description, test } = useLoadChallenge(slug);
-  const { writtenCode } = useSnapshot(store.challenge.states);
+  const { writtenCode } = useSnapshot(store.challenge);
 
   const launchTest = async () => {
     const templatePath = await resolveResource("../dist/template.html");

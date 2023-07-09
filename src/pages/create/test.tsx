@@ -24,7 +24,7 @@ const CreateTest = () => {
 
   const { testString } = useSnapshot(store.challenge);
   const { addTest } = actions.challenge;
-  const { handlePrevious } = actions.stepper;
+  const { handlePrevious, handleNext } = actions.stepper;
   const evaluateJavaScriptCode = (text: string) => {
     try {
       eval(text);
@@ -99,6 +99,7 @@ const CreateTest = () => {
         <label htmlFor="">Code de départ</label>
         <CodeMirror
           className="w-full h-full text-lg"
+          autoFocus
           value={starter}
           height="200px"
           extensions={[javascript({ jsx: true })]}
@@ -147,7 +148,10 @@ const CreateTest = () => {
           />
         </div>
       </div>
-      <Button onClick={handlePrevious}>Revenir</Button>
+      <div className="flex items-center gap-4">
+        <Button onClick={handlePrevious}>Revenir</Button>
+        <Button onClick={handleNext}>Suivant</Button>
+      </div>
     </div>
   );
 };

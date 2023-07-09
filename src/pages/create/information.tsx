@@ -20,7 +20,7 @@ const CreateInformation = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    title.includes("#TITLE")
+    store.challenge.testString.includes("#TITLE")
       ? (store.challenge.testString = testString.replaceAll("#TITLE", title))
       : modifyTestString(title);
 

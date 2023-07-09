@@ -21,7 +21,10 @@ export const ChallengeActions: ChallengeActionProps = {
   },
   modifyTestString: (value: string) => {
     store.challenge.testString = initialTest;
-    store.challenge.testString.replaceAll("#TITLE", value);
+    store.challenge.testString = store.challenge.testString.replaceAll(
+      "#TITLE",
+      value
+    );
   },
   resetChallengeForm: () => {
     store.challenge.description = "";
