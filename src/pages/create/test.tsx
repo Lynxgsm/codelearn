@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { javascript } from "@codemirror/lang-javascript";
 import { extractFunctionInfo, slugify } from "../../helpers/strings";
 import { useSnapshot } from "valtio";
-import { store } from "../../store";
+import { actions, store } from "../../store";
 import { open } from "@tauri-apps/api/dialog";
 import { resolveResource } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -22,10 +22,9 @@ const CreateTest = () => {
     setstarter(value);
   };
 
-  const { testString } = useSnapshot(store.challenge.states);
-  const { addTest, setTestString } = store.challenge.actions;
-  const { handlePrevious } = store.stepper.actions;
-
+  const { testString } = useSnapshot(store.challenge);
+  const { addTest } = actions.challenge;
+  const { handlePrevious } = actions.stepper;
   const evaluateJavaScriptCode = (text: string) => {
     try {
       eval(text);
@@ -154,10 +153,7 @@ const CreateTest = () => {
 };
 
 const TestBatteries = () => {
-  const { tests, testsWithValue, testString } = useSnapshot(
-    store.challenge.states
-  );
-  const { setTestString } = store.challenge.actions;
+  const { tests, testsWithValue, testString } = useSnapshot(store.challenge);
   return (
     <>
       <ul>
@@ -184,8 +180,9 @@ const TestBatteries = () => {
             );
           });
 
-          setTestString(
-            testString.replace("#TESTS", generatedString.join("\n"))
+          store.challenge.testString = testString.replace(
+            "#TESTS",
+            generatedString.join("\n")
           );
         }}
       >
@@ -211,7 +208,7 @@ const TestBatteryItem = ({
     }, {} as { [key: string]: string })
   );
 
-  const { setTestsWithValue } = store.challenge.actions;
+  const { setTestsWithValue } = actions.challenge;
 
   return (
     <li className="flex items-center gap-2">
