@@ -6,6 +6,6 @@ type StepperActionsType = {
 };
 
 export const StepperActions: StepperActionsType = {
-  handleNext: () => (store.stepper.states.currentIndex += 1),
-  handlePrevious: () => (store.stepper.states.currentIndex -= 1),
+  handleNext: () => (store.stepper.currentIndex += 1),
+  handlePrevious: () => (store.stepper.currentIndex -= 1),
 };

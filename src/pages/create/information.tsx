@@ -1,21 +1,19 @@
 import { FormEvent } from "react";
 import Input from "../../components/common/input";
 import MDEditor from "@uiw/react-md-editor";
-import { store } from "../../store";
+import { actions, store } from "../../store";
 import { useSnapshot } from "valtio";
 import Button from "../../components/common/button";
 import { toast } from "react-hot-toast";
 
 const CreateInformation = () => {
-  const { modifyTestString } = store.challenge.actions;
-  const { handleNext } = store.stepper.actions;
-  const { testString, title, description } = useSnapshot(
-    store.challenge.states
-  );
+  const { modifyTestString } = actions.challenge;
+  const { handleNext } = actions.stepper;
+  const { testString, title, description } = useSnapshot(store.challenge);
 
   const handleContent = (value?: string | undefined) => {
     if (value) {
-      store.challenge.states.description = value;
+      store.challenge.description = value;
     }
   };
 
@@ -23,10 +21,7 @@ const CreateInformation = () => {
     e.preventDefault();
 
     title.includes("#TITLE")
-      ? (store.challenge.states.testString = testString.replaceAll(
-          "#TITLE",
-          title
-        ))
+      ? (store.challenge.testString = testString.replaceAll("#TITLE", title))
       : modifyTestString(title);
 
     if (description) {
@@ -42,7 +37,7 @@ const CreateInformation = () => {
       <Input
         name="title"
         type="text"
-        onChange={(e) => (store.challenge.states.title = e.currentTarget.value)}
+        onChange={(e) => (store.challenge.title = e.currentTarget.value)}
         label="Titre"
         required
         value={title}
