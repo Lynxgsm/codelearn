@@ -57,11 +57,18 @@ const ListContainer = () => {
   const { challenges } = useChallengeList();
   return (
     <ul className="flex flex-col gap-2 flex-1">
-      {challenges.map((challenge) => (
-        <li className="capitalize rounded-sm bg-neutral-100 p-2 hover:bg-neutral-300">
-          <Link to={`/challenge/${challenge}`}>{unslugify(challenge)}</Link>
-        </li>
-      ))}
+      {challenges.length > 0 ? (
+        challenges.map((challenge) => (
+          <li className="capitalize rounded-sm bg-neutral-100 p-2 hover:bg-neutral-300">
+            <Link to={`/challenge/${challenge}`}>{unslugify(challenge)}</Link>
+          </li>
+        ))
+      ) : (
+        <p>
+          Vous n'avez pas de challenge disponible. Vous pouvez en créer un ou en
+          importer un.
+        </p>
+      )}
     </ul>
   );
 };

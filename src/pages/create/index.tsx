@@ -7,14 +7,24 @@ import { actions } from "../../store";
 
 const CreateChallengePage = () => {
   const { resetIndex } = actions.stepper;
+  const { resetChallengeForm } = actions.challenge;
   useEffect(() => {
     return () => {
       resetIndex();
+      resetChallengeForm();
     };
   }, []);
+
   return (
     <Stepper
-      steps={[<CreateInformation />, <CreateTest />, <CreatePreview />]}
+      steps={[
+        {
+          title: "Information",
+          child: <CreateInformation />,
+        },
+        { title: "Test", child: <CreateTest /> },
+        { title: "Preview", child: <CreatePreview /> },
+      ]}
     />
   );
 };

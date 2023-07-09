@@ -28,7 +28,7 @@ const ChallengePage = () => {
 
     setTimeout(() => {
       setloadTest(true);
-    }, 1000);
+    }, 100);
   };
 
   return (

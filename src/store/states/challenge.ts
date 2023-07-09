@@ -6,6 +6,7 @@ type ChallengeStatesProps = {
   testsWithValue: TestWithResult[];
   testString: string;
   functionName: string;
+  starterFunction: string;
   writtenCode: string;
   title: string;
   description: string;
@@ -19,4 +20,5 @@ export const ChallengeStates: ChallengeStatesProps = {
   writtenCode: "",
   title: "",
   description: "",
+  starterFunction: "",
 };

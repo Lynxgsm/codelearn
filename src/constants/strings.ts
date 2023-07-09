@@ -1,7 +1,11 @@
 export const initialTest = `
 describe("#TITLE", () => {
-  it("#TITLE", () => {
-    #TESTS
-  });
+  # TESTS
 });
+`;
+
+export const testPlaceholder = `
+it("#TITLE", () => {
+    #TEST
+  });
 `;

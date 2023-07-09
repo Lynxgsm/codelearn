@@ -22,7 +22,7 @@ const CreateInformation = () => {
 
     store.challenge.testString.includes("#TITLE")
       ? (store.challenge.testString = testString.replaceAll("#TITLE", title))
-      : modifyTestString(title);
+      : modifyTestString();
 
     if (description) {
       handleNext();

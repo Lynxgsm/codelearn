@@ -6,7 +6,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { extractFunctionInfo, slugify } from "../../helpers/strings";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useSnapshot } from "valtio";
-import { store } from "../../store";
+import { actions, store } from "../../store";
 import { invoke } from "@tauri-apps/api/tauri";
 import { resolveResource } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
@@ -243,7 +243,7 @@ const TestBatteryItem = ({
   id,
 }: {
   functionName: string;
-  params: readonly string[];
+  params: string[];
   id: string;
 }) => {
   const [tests, settests] = useState<{ [key: string]: string }>(
@@ -253,7 +253,7 @@ const TestBatteryItem = ({
     }, {} as { [key: string]: string })
   );
 
-  const { setTestsWithValue } = store.challenge.actions;
+  const { setTestsWithValue } = actions.challenge;
 
   return (
     <li className="flex items-center gap-2">
