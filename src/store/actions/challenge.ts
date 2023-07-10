@@ -47,8 +47,6 @@ export const ChallengeActions: ChallengeActionProps = {
       "# TESTS",
       generatedString.join("\n")
     );
-
-    console.log(generatedString);
   },
   resetChallengeForm: () => {
     store.challenge.description = "";

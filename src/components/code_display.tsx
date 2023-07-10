@@ -1,20 +1,23 @@
 import { javascript } from "@codemirror/lang-javascript";
-import CodeMirror from "@uiw/react-codemirror";
-import { store } from "../store";
+import CodeMirror, {
+  ReactCodeMirrorProps,
+  ReactCodeMirrorRef,
+} from "@uiw/react-codemirror";
+import { FC } from "react";
 
-const CodeDisplay = ({ initial }: { initial: string }) => {
-  const onChange = (value: string) => {
-    store.challenge.writtenCode = value;
+type Props = ReactCodeMirrorProps &
+  ReactCodeMirrorRef & {
+    customclass?: string;
   };
 
+const CodeDisplay: FC<Props> = (props) => {
   return (
     <CodeMirror
-      className="w-full h-full text-lg"
-      value={initial}
+      theme={"dark"}
+      {...props}
+      className={`w-full h-full text-lg ${props.customclass}`}
       height="200px"
       extensions={[javascript({ jsx: true })]}
-      onChange={onChange}
-      theme={"dark"}
     />
   );
 };

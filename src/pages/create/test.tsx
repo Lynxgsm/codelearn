@@ -8,6 +8,7 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import Input from "../../components/common/input";
 import Button from "../../components/common/button";
 import { TestWithResult } from "../../types/Test";
+import CodeDisplay from "../../components/code_display";
 
 const CreateTest = () => {
   const [errorInScript, seterrorInScript] = useState("");
@@ -103,7 +104,7 @@ const CreateTest = () => {
           </div>
           <TestBatteries />
         </div>
-        <div className="flex-1">
+        {/* <div>
           // HIDE THIS ON PRODUCTION
           <CodeMirror
             className="w-full h-full text-lg"
@@ -114,7 +115,7 @@ const CreateTest = () => {
             aria-disabled="true"
             readOnly={true}
           />
-        </div>
+        </div> */}
       </div>
       <div className="flex items-center gap-4">
         <Button onClick={handlePrevious}>Revenir</Button>
@@ -160,71 +161,77 @@ const TestBatteryItem = ({ functionName, params, id }: TestWithResult) => {
   const { setTestsWithValue } = actions.challenge;
 
   return (
-    <li className="flex items-center gap-2">
+    <li className="flex items-center gap-2 w-full">
+      <Input
+        name="description"
+        placeholder="Une courte description du test"
+        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          const description = e.currentTarget.value;
+          setdescription(description);
+          // settests((t) => {
+          //   t["description"] = description;
+          //   return t;
+          // });
+
+          // setTestsWithValue({
+          //   id,
+          //   functionName,
+          //   params: tests,
+          //   result: expectedResult,
+          //   description,
+          // });
+        }}
+        label="Description"
+      />
       <div className="flex-1 flex items-center gap-2">
-        <Input
-          name="description"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            const description = e.currentTarget.value;
-            setdescription(description);
-            settests((t) => {
-              t["description"] = description;
-              return t;
-            });
-
-            setTestsWithValue({
-              id,
-              functionName,
-              params: tests,
-              result: expectedResult,
-              description,
-            });
-          }}
-          label="Description"
-        />
         {Object.keys(params).map((param, index) => (
-          <Input
-            key={`param_input_${index}`}
-            name={`param_${index}`}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const value = e.currentTarget.value;
-              if (value) {
-                settests((t) => {
-                  t[param] = value;
-                  return t;
+          <div className="flex-1 flex flex-col" key={`param_input_${index}`}>
+            <label htmlFor={`param_input_${index}`}>{param}</label>
+            <CodeDisplay
+              id={`param_input_${index}`}
+              style={{
+                backgroundColor: "white",
+                minWidth: 180,
+              }}
+              basicSetup={{
+                lineNumbers: false,
+              }}
+              value={tests[param]}
+              onChange={(value) => {
+                if (value) {
+                  settests((t) => {
+                    t[param] = value;
+                    return t;
+                  });
+                }
+
+                setTestsWithValue({
+                  id,
+                  functionName,
+                  params: tests,
+                  result: expectedResult,
+                  description,
                 });
-              }
-
-              setTestsWithValue({
-                id,
-                functionName,
-                params: tests,
-                result: expectedResult,
-                description,
-              });
-            }}
-            label={param}
-          />
+              }}
+            />
+          </div>
         ))}
-        <Input
-          name="result"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            const result = e.currentTarget.value;
-
-            setTestsWithValue({
-              id,
-              functionName,
-              params: tests,
-              result,
-              description,
-            });
+      </div>
+      <div className="flex flex-col flex-1">
+        <label htmlFor="">Expected result</label>
+        <CodeDisplay
+          value={expectedResult}
+          theme={"light"}
+          basicSetup={{
+            lineNumbers: false,
           }}
-          label="Expected result"
+          customclass="border-2"
+          onChange={(value) => {
+            setExpectedResult(value);
+            
+          }}
         />
       </div>
-      <button>
-        <FaTrash />
-      </button>
     </li>
   );
 };

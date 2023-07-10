@@ -106,7 +106,7 @@ const CreatePreview = () => {
               <div className="bg-neutral-700 text-white py-1 px-3 rounded-tl-md rounded-tr-md">
                 <p>Code</p>
               </div>
-              <CodeDisplay initial={starterFunction} />
+              <CodeDisplay defaultValue={starterFunction} />
             </div>
             {loadTest ? (
               <div className="flex-1">
@@ -136,7 +136,7 @@ const TestDisplay = () => {
           return (
             <li key={`test_with_values_${index}`} className="my-2">
               <CodeDisplay
-                initial={`${functionName}(${Object.keys(params).join(
+                defaultValue={`${functionName}(${Object.keys(params).join(
                   ","
                 )})=${result}`}
               />

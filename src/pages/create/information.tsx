@@ -12,9 +12,7 @@ const CreateInformation = () => {
   const { testString, title, description } = useSnapshot(store.challenge);
 
   const handleContent = (value?: string | undefined) => {
-    if (value) {
-      store.challenge.description = value;
-    }
+    store.challenge.description = value ?? "";
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {

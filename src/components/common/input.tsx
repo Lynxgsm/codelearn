@@ -4,11 +4,12 @@ type InputProps = ComponentProps<"input"> & {
   label?: string;
   info?: string;
   state?: "valid" | "error";
+  wide?: boolean;
 };
 
-const Input: FC<InputProps> = ({ state = "valid", ...props }) => {
+const Input: FC<InputProps> = ({ state = "valid", wide = true, ...props }) => {
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className={`flex flex-col gap-2 ${wide ? "w-full" : "w-auto"}`}>
       <label htmlFor={props.name} className="text-slate-500">
         {props.label ?? props.name}{" "}
         {props.required && <sup className="text-red-500">*</sup>}
