@@ -228,7 +228,13 @@ const TestBatteryItem = ({ functionName, params, id }: TestWithResult) => {
           customclass="border-2"
           onChange={(value) => {
             setExpectedResult(value);
-            
+            setTestsWithValue({
+              id,
+              functionName,
+              params: tests,
+              result: value,
+              description,
+            });
           }}
         />
       </div>
